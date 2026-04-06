@@ -1,0 +1,72 @@
+﻿services:
+  post-service:
+    image: post-service
+    container_name: post-service
+    build:
+      context: ../PostService
+      dockerfile: src/PostService/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=post-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      GrpcClients__UserService__Address: "https://user-service:8080"
+    networks:
+      - post-network
+    depends_on:
+      post-db:
+        condition: service_healthy
+        
+  post-db:
+    image: postgres:18.3-alpine
+    container_name: post-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - post-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U testuser -d testdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - post-pgdata:/var/lib/postgresql/data
+        
+  user-service:
+    container_name: user-service
+    build:
+      context: ../UserService
+      dockerfile: src/UserService/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=user-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    networks:
+      - post-network
+    depends_on:
+      user-db:
+        condition: service_healthy
+
+  user-db:
+    image: postgres:18.3-alpine
+    container_name: user-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - post-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U testuser -d testdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - user-pgdata:/var/lib/postgresql/data
+
+networks:
+  post-network:
+    driver: bridge
+
+volumes:
+  user-pgdata:
+  post-pgdata:
