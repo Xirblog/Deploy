@@ -86,10 +86,43 @@
     volumes:
       - user-pgdata:/var/lib/postgresql/data
 
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ../AuthService
+      dockerfile: src/AuthService/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=auth-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      UserService__BaseUrl: "https://user-service:8080"
+    networks:
+      - services-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+
+  auth-db:
+    image: postgres:18.3-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - services-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U testuser -d testdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - auth-pgdata:/var/lib/postgresql/data
+
 networks:
   services-network:
     driver: bridge
 
 volumes:
   user-pgdata:
+  auth-pgdata:
   post-pgdata:
