@@ -30,7 +30,7 @@
       dockerfile: src/PostService/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Host=post-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
-      GrpcClients__UserService__Address: "https://user-service:8080"
+      GrpcClients__UserService__Address: "http://user-service:8080"
     networks:
       - services-network
     depends_on:
@@ -93,7 +93,7 @@
       dockerfile: src/AuthService/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Host=auth-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
-      UserService__BaseUrl: "https://user-service:8080"
+      GrpcClients__UserService__Url: "http://user-service:8080"
     networks:
       - services-network
     depends_on:
