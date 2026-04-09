@@ -1,4 +1,24 @@
 ﻿services:
+  frontend:
+    image: xirblog-frontend
+    container_name: frontend
+    build:
+      context: ../Frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=/api
+      - BACKEND_URL=http://gateway:8080
+    networks:
+      - services-network
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
   gateway:
     image: gateway
     container_name: gateway
