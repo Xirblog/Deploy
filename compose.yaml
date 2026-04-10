@@ -65,7 +65,7 @@
       retries: 5
       start_period: 10s
     volumes:
-      - post-pgdata:/var/lib/postgresql/data
+      - post-pgdata:/var/lib/postgresql/18/docker
         
   user-service:
     container_name: user-service
@@ -96,7 +96,7 @@
       retries: 5
       start_period: 10s
     volumes:
-      - user-pgdata:/var/lib/postgresql/data
+      - user-pgdata:/var/lib/postgresql/18/docker
 
   auth-service:
     container_name: auth-service
@@ -128,7 +128,7 @@
       retries: 5
       start_period: 10s
     volumes:
-      - auth-pgdata:/var/lib/postgresql/data
+      - auth-pgdata:/var/lib/postgresql/18/docker
 
 networks:
   services-network:
