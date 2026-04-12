@@ -1,6 +1,6 @@
 ﻿services:
   frontend:
-    image: xirblog-frontend
+    image: frontend
     container_name: frontend
     build:
       context: ../Frontend
@@ -22,13 +22,15 @@
     image: gateway
     container_name: gateway
     build:
-      context: ../Gateway
-      dockerfile: src/Gateway/Dockerfile
+      context: ../BlogGateway
+      dockerfile: src/BlogGateway/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - PORT=8080
     networks:
       - services-network
+    ports:
+      - "8080:8080"
     depends_on:
       - user-service
       - post-service
@@ -38,8 +40,8 @@
     image: post-service
     container_name: post-service
     build:
-      context: ../PostService
-      dockerfile: src/PostService/Dockerfile
+      context: ../BlogPostService
+      dockerfile: src/BlogPostService/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Host=post-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       GrpcClients__UserService__Address: "http://user-service:8080"
@@ -70,8 +72,8 @@
   user-service:
     container_name: user-service
     build:
-      context: ../UserService
-      dockerfile: src/UserService/Dockerfile
+      context: ../BlogUserService
+      dockerfile: src/BlogUserService/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Host=user-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
     networks:
@@ -101,8 +103,8 @@
   auth-service:
     container_name: auth-service
     build:
-      context: ../AuthService
-      dockerfile: src/AuthService/Dockerfile
+      context: ../BlogAuthService
+      dockerfile: src/BlogAuthService/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Host=auth-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       GrpcClients__UserService__Url: "http://user-service:8080"
